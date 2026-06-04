@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University AI — Color Theme Explorations</title>
+  <style>
+    /* ─────────────────────────────────────────────
+       BASE / RESET
+       ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+      background: #F0F2F5; /* page canvas — neutral cool gray */
+      color: #1A1A2E;
+      padding: 40px 32px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      color: #1B2A4A; /* navy */
+      margin-bottom: 4px;
+    }
+
+    .page-meta {
+      font-size: .8rem;
+      color: #6B7280;
+      margin-bottom: 40px;
+    }
+
+    /* ─────────────────────────────────────────────
+       GRID
+       ───────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ─────────────────────────────────────────────
+       THEME CARD SHELL
+       ───────────────────────────────────────────── */
+    .card {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.10);
+      background: #FFFFFF;
+    }
+
+    /* ── Card header band ── */
+    .card-header {
+      padding: 18px 20px 16px;
+    }
+
+    .card-header h2 {
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .card-header .register {
+      font-size: .72rem;
+      color: rgba(255,255,255,.80);
+      line-height: 1.4;
+    }
+
+    /* ── Token chips section ── */
+    .token-section {
+      padding: 14px 20px;
+      background: #F8F9FB;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .token-section-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #9CA3AF;
+      margin-bottom: 10px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 20px;
+      padding: 4px 10px 4px 6px;
+      font-size: .68rem;
+      font-weight: 600;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .chip-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.12);
+      flex-shrink: 0;
+    }
+
+    /* ── UI snippet section ── */
+    .ui-section {
+      padding: 16px 20px 20px;
+    }
+
+    .ui-section-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #9CA3AF;
+      margin-bottom: 12px;
+    }
+
+    /* Chat frame */
+    .chat-frame {
+      border-radius: 8px;
+      border: 1px solid #E5E7EB;
+      overflow: hidden;
+    }
+
+    .chat-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+    }
+
+    .chat-topbar-title {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      opacity: .92;
+    }
+
+    .chat-topbar-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.45);
+      margin-left: auto;
+    }
+
+    .chat-body {
+      background: #F8F9FB;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Student bubble */
+    .bubble-student {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .bubble-student-inner {
+      max-width: 85%;
+      border-radius: 14px 14px 4px 14px;
+      padding: 9px 12px;
+      font-size: .74rem;
+      line-height: 1.45;
+      color: #FFFFFF;
+    }
+
+    /* AI response */
+    .bubble-ai {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .ai-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: .65rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-top: 2px;
+    }
+
+    .bubble-ai-inner {
+      max-width: 90%;
+      background: #FFFFFF;
+      border-radius: 4px 14px 14px 14px;
+      padding: 9px 12px;
+      font-size: .74rem;
+      line-height: 1.5;
+      color: #1F2937;
+      border: 1px solid #E5E7EB;
+    }
+
+    .bubble-ai-inner strong {
+      display: block;
+      font-size: .68rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .ai-tag {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .62rem;
+      font-weight: 700;
+      margin-right: 3px;
+      margin-top: 6px;
+      color: #FFFFFF;
+    }
+
+    /* Chat input bar */
+    .chat-input-bar {
+      background: #FFFFFF;
+      border-top: 1px solid #E5E7EB;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-input-fake {
+      flex: 1;
+      height: 28px;
+      border-radius: 20px;
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      font-size: .7rem;
+      color: #9CA3AF;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+    }
+
+    .chat-send-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .chat-send-icon {
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid #FFFFFF;
+      border-right: 2px solid #FFFFFF;
+      transform: rotate(45deg) translateX(-1px);
+    }
+
+    /* ─────────────────────────────────────────────
+       THEME 1 — NAVY + GOLD
+       Primary: #1B2A4A  Accent: #C9A84C
+       Surface: #FFFFFF  Text: #1F2937
+       Border: #E5E7EB   Muted: #F8F9FB
+       ───────────────────────────────────────────── */
+    .t1 .card-header   { background: #1B2A4A; } /* navy */
+    .t1 .chat-topbar   { background: #1B2A4A; } /* navy */
+    .t1 .bubble-student-inner { background: #C9A84C; } /* gold accent */
+    .t1 .ai-avatar     { background: #1B2A4A; } /* navy */
+    .t1 .ai-tag        { background: #C9A84C; } /* gold accent */
+    .t1 .chat-send-btn { background: #C9A84C; } /* gold accent */
+
+    /* ─────────────────────────────────────────────
+       THEME 2 — NAVY + TEAL
+       Primary: #1B2A4A  Accent: #2A9D8F
+       Surface: #FFFFFF  Text: #1F2937
+       Border: #E5E7EB   Muted: #F8F9FB
+       ───────────────────────────────────────────── */
+    .t2 .card-header   { background: #1B2A4A; } /* navy */
+    .t2 .chat-topbar   { background: #1B2A4A; } /* navy */
+    .t2 .bubble-student-inner { background: #2A9D8F; } /* teal accent */
+    .t2 .ai-avatar     { background: #1B2A4A; } /* navy */
+    .t2 .ai-tag        { background: #2A9D8F; } /* teal accent */
+    .t2 .chat-send-btn { background: #2A9D8F; } /* teal accent */
+
+    /* ─────────────────────────────────────────────
+       THEME 3 — NAVY + SLATE
+       Primary: #1B2A4A  Accent: #5B7FA6
+       Surface: #FFFFFF  Text: #1F2937
+       Border: #E5E7EB   Muted: #F8F9FB
+       ───────────────────────────────────────────── */
+    .t3 .card-header   { background: #1B2A4A; } /* navy */
+    .t3 .chat-topbar   { background: #1B2A4A; } /* navy */
+    .t3 .bubble-student-inner { background: #5B7FA6; } /* slate accent */
+    .t3 .ai-avatar     { background: #1B2A4A; } /* navy */
+    .t3 .ai-tag        { background: #5B7FA6; } /* slate accent */
+    .t3 .chat-send-btn { background: #5B7FA6; } /* slate accent */
+
+    /* ─────────────────────────────────────────────
+       THEME 4 — NAVY + CRIMSON
+       Primary: #1B2A4A  Accent: #A63232
+       Surface: #FFFFFF  Text: #1F2937
+       Border: #E5E7EB   Muted: #F8F9FB
+       ───────────────────────────────────────────── */
+    .t4 .card-header   { background: #1B2A4A; } /* navy */
+    .t4 .chat-topbar   { background: #1B2A4A; } /* navy */
+    .t4 .bubble-student-inner { background: #A63232; } /* crimson accent */
+    .t4 .ai-avatar     { background: #1B2A4A; } /* navy */
+    .t4 .ai-tag        { background: #A63232; } /* crimson accent */
+    .t4 .chat-send-btn { background: #A63232; } /* crimson accent */
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE FALLBACK
+       ───────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>University AI — Color Theme Explorations</h1>
+  <p class="page-meta">Light mode &nbsp;·&nbsp; 4 navy-anchored variations &nbsp;·&nbsp; 2026-06-04</p>
+
+  <div class="grid">
+
+    <!-- ════════════════════════════════
+         THEME 1 — NAVY + GOLD
+         ════════════════════════════════ -->
+    <div class="card t1">
+      <div class="card-header">
+        <h2>Navy + Gold</h2>
+        <p class="register">Classic collegiate authority — timeless, trustworthy, prestigious</p>
+      </div>
+
+      <div class="token-section">
+        <div class="token-section-label">Design Tokens</div>
+        <div class="chips">
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1B2A4A;"></span>
+            Primary&nbsp;<span style="color:#6B7280;">#1B2A4A</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#C9A84C;"></span>
+            Accent&nbsp;<span style="color:#6B7280;">#C9A84C</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#FFFFFF; border:1px solid #D1D5DB;"></span>
+            Surface&nbsp;<span style="color:#6B7280;">#FFFFFF</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1F2937;"></span>
+            Text&nbsp;<span style="color:#6B7280;">#1F2937</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#E5E7EB;"></span>
+            Border&nbsp;<span style="color:#6B7280;">#E5E7EB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-section">
+        <div class="ui-section-label">UI Preview</div>
+        <div class="chat-frame">
+          <div class="chat-topbar">
+            <div class="chat-topbar-title">University AI</div>
+            <div class="chat-topbar-dot"></div>
+          </div>
+          <div class="chat-body">
+            <div class="bubble-student">
+              <div class="bubble-student-inner">
+                What courses do I still need for my Computer Science degree?
+              </div>
+            </div>
+            <div class="bubble-ai">
+              <div class="ai-avatar">AI</div>
+              <div class="bubble-ai-inner">
+                <strong style="color:#1B2A4A;">University AI</strong>
+                Based on your transcript, you have <b>3 requirements</b> remaining: Algorithm Design, Operating Systems, and your Senior Capstone. You're on track to finish by Spring 2027.
+                <br/>
+                <span class="ai-tag" style="background:#C9A84C;">Algorithm Design</span>
+                <span class="ai-tag" style="background:#C9A84C;">OS</span>
+                <span class="ai-tag" style="background:#C9A84C;">Capstone</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <div class="chat-input-fake">Ask a follow-up question…</div>
+            <div class="chat-send-btn">
+              <div class="chat-send-icon"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         THEME 2 — NAVY + TEAL
+         ════════════════════════════════ -->
+    <div class="card t2">
+      <div class="card-header">
+        <h2>Navy + Teal</h2>
+        <p class="register">Modern institutional, approachable — innovative yet dependable</p>
+      </div>
+
+      <div class="token-section">
+        <div class="token-section-label">Design Tokens</div>
+        <div class="chips">
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1B2A4A;"></span>
+            Primary&nbsp;<span style="color:#6B7280;">#1B2A4A</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#2A9D8F;"></span>
+            Accent&nbsp;<span style="color:#6B7280;">#2A9D8F</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#FFFFFF; border:1px solid #D1D5DB;"></span>
+            Surface&nbsp;<span style="color:#6B7280;">#FFFFFF</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1F2937;"></span>
+            Text&nbsp;<span style="color:#6B7280;">#1F2937</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#E5E7EB;"></span>
+            Border&nbsp;<span style="color:#6B7280;">#E5E7EB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-section">
+        <div class="ui-section-label">UI Preview</div>
+        <div class="chat-frame">
+          <div class="chat-topbar">
+            <div class="chat-topbar-title">University AI</div>
+            <div class="chat-topbar-dot"></div>
+          </div>
+          <div class="chat-body">
+            <div class="bubble-student">
+              <div class="bubble-student-inner">
+                What courses do I still need for my Computer Science degree?
+              </div>
+            </div>
+            <div class="bubble-ai">
+              <div class="ai-avatar">AI</div>
+              <div class="bubble-ai-inner">
+                <strong style="color:#1B2A4A;">University AI</strong>
+                Based on your transcript, you have <b>3 requirements</b> remaining: Algorithm Design, Operating Systems, and your Senior Capstone. You're on track to finish by Spring 2027.
+                <br/>
+                <span class="ai-tag" style="background:#2A9D8F;">Algorithm Design</span>
+                <span class="ai-tag" style="background:#2A9D8F;">OS</span>
+                <span class="ai-tag" style="background:#2A9D8F;">Capstone</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <div class="chat-input-fake">Ask a follow-up question…</div>
+            <div class="chat-send-btn">
+              <div class="chat-send-icon"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         THEME 3 — NAVY + SLATE
+         ════════════════════════════════ -->
+    <div class="card t3">
+      <div class="card-header">
+        <h2>Navy + Slate</h2>
+        <p class="register">Quiet, minimal, serious — understated confidence and focus</p>
+      </div>
+
+      <div class="token-section">
+        <div class="token-section-label">Design Tokens</div>
+        <div class="chips">
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1B2A4A;"></span>
+            Primary&nbsp;<span style="color:#6B7280;">#1B2A4A</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#5B7FA6;"></span>
+            Accent&nbsp;<span style="color:#6B7280;">#5B7FA6</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#FFFFFF; border:1px solid #D1D5DB;"></span>
+            Surface&nbsp;<span style="color:#6B7280;">#FFFFFF</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1F2937;"></span>
+            Text&nbsp;<span style="color:#6B7280;">#1F2937</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#E5E7EB;"></span>
+            Border&nbsp;<span style="color:#6B7280;">#E5E7EB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-section">
+        <div class="ui-section-label">UI Preview</div>
+        <div class="chat-frame">
+          <div class="chat-topbar">
+            <div class="chat-topbar-title">University AI</div>
+            <div class="chat-topbar-dot"></div>
+          </div>
+          <div class="chat-body">
+            <div class="bubble-student">
+              <div class="bubble-student-inner">
+                What courses do I still need for my Computer Science degree?
+              </div>
+            </div>
+            <div class="bubble-ai">
+              <div class="ai-avatar">AI</div>
+              <div class="bubble-ai-inner">
+                <strong style="color:#1B2A4A;">University AI</strong>
+                Based on your transcript, you have <b>3 requirements</b> remaining: Algorithm Design, Operating Systems, and your Senior Capstone. You're on track to finish by Spring 2027.
+                <br/>
+                <span class="ai-tag" style="background:#5B7FA6;">Algorithm Design</span>
+                <span class="ai-tag" style="background:#5B7FA6;">OS</span>
+                <span class="ai-tag" style="background:#5B7FA6;">Capstone</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <div class="chat-input-fake">Ask a follow-up question…</div>
+            <div class="chat-send-btn">
+              <div class="chat-send-icon"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         THEME 4 — NAVY + CRIMSON
+         ════════════════════════════════ -->
+    <div class="card t4">
+      <div class="card-header">
+        <h2>Navy + Crimson</h2>
+        <p class="register">Bold academic tradition — heritage, gravitas, unmistakable identity</p>
+      </div>
+
+      <div class="token-section">
+        <div class="token-section-label">Design Tokens</div>
+        <div class="chips">
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1B2A4A;"></span>
+            Primary&nbsp;<span style="color:#6B7280;">#1B2A4A</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#A63232;"></span>
+            Accent&nbsp;<span style="color:#6B7280;">#A63232</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#FFFFFF; border:1px solid #D1D5DB;"></span>
+            Surface&nbsp;<span style="color:#6B7280;">#FFFFFF</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#1F2937;"></span>
+            Text&nbsp;<span style="color:#6B7280;">#1F2937</span>
+          </div>
+          <div class="chip">
+            <span class="chip-swatch" style="background:#E5E7EB;"></span>
+            Border&nbsp;<span style="color:#6B7280;">#E5E7EB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-section">
+        <div class="ui-section-label">UI Preview</div>
+        <div class="chat-frame">
+          <div class="chat-topbar">
+            <div class="chat-topbar-title">University AI</div>
+            <div class="chat-topbar-dot"></div>
+          </div>
+          <div class="chat-body">
+            <div class="bubble-student">
+              <div class="bubble-student-inner">
+                What courses do I still need for my Computer Science degree?
+              </div>
+            </div>
+            <div class="bubble-ai">
+              <div class="ai-avatar">AI</div>
+              <div class="bubble-ai-inner">
+                <strong style="color:#1B2A4A;">University AI</strong>
+                Based on your transcript, you have <b>3 requirements</b> remaining: Algorithm Design, Operating Systems, and your Senior Capstone. You're on track to finish by Spring 2027.
+                <br/>
+                <span class="ai-tag" style="background:#A63232;">Algorithm Design</span>
+                <span class="ai-tag" style="background:#A63232;">OS</span>
+                <span class="ai-tag" style="background:#A63232;">Capstone</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <div class="chat-input-fake">Ask a follow-up question…</div>
+            <div class="chat-send-btn">
+              <div class="chat-send-icon"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.grid -->
+
+</body>
+</html>

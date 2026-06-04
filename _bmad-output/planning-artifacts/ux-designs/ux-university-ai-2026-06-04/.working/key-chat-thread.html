@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University AI — Chat Thread Mock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    /*
+     * ============================================================
+     * SPINE SECTIONS GOVERNING THIS SCREEN
+     * ============================================================
+     * 1. Chat Thread — primary conversation rendering (student & AI bubbles)
+     * 2. Navigation Bar — branding, persona identity chip
+     * 3. Input Area — sticky message composer, send action
+     * 4. Error State — failed AI response surface with retry affordance
+     * 5. Loading / Typing State — animated ellipsis skeleton for AI turn
+     * 6. Typography & Color Tokens — Playfair Display, Inter, navy/crimson/gray palette
+     * ============================================================
+     */
+
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #E5E7EB;
+      color: #1F2937;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Section labels (mock meta) ── */
+    .mock-section-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6B7280;
+      padding: 20px 0 8px 0;
+      text-align: center;
+    }
+
+    /* ── Browser chrome wrapper ── */
+    .browser-chrome {
+      width: 1280px;
+      margin: 0 auto 32px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+
+    .browser-bar {
+      background: #EDEFF2;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #D1D5DB;
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .browser-dots span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .browser-dots span:nth-child(1) { background: #FC5F57; }
+    .browser-dots span:nth-child(2) { background: #FDBC2C; }
+    .browser-dots span:nth-child(3) { background: #27C840; }
+
+    .browser-address {
+      flex: 1;
+      background: #FFFFFF;
+      border: 1px solid #D1D5DB;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: #6B7280;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── App shell ── */
+    .app-shell {
+      width: 100%;
+      height: 800px;
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Nav bar ── */
+    .nav-bar {
+      background: #1B2A4A;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: #FFFFFF;
+      letter-spacing: 0.01em;
+    }
+
+    .persona-chip {
+      border: 1.5px solid rgba(255,255,255,0.6);
+      border-radius: 999px;
+      padding: 5px 16px;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .persona-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #A63232;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* ── Chat thread ── */
+    .chat-thread {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 40px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #FFFFFF;
+    }
+
+    /* Date divider */
+    .date-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 4px 0 8px 0;
+    }
+
+    .date-divider::before,
+    .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E5E7EB;
+    }
+
+    .date-divider span {
+      font-size: 12px;
+      color: #6B7280;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* Bubbles */
+    .message-row {
+      display: flex;
+      gap: 12px;
+      max-width: 820px;
+    }
+
+    .message-row.student {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.ai {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .avatar.student-avatar {
+      background: #A63232;
+      color: #FFFFFF;
+    }
+
+    .avatar.ai-avatar {
+      background: #1B2A4A;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .bubble {
+      padding: 12px 16px;
+      border-radius: 8px;
+      max-width: 640px;
+    }
+
+    .bubble.student-bubble {
+      background: #F8F9FB;
+      color: #1F2937;
+      border-radius: 8px 2px 8px 8px;
+    }
+
+    .bubble.ai-bubble {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      color: #1F2937;
+      border-radius: 2px 8px 8px 8px;
+    }
+
+    .bubble-meta {
+      font-size: 11px;
+      color: #6B7280;
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .message-row.student .bubble-meta {
+      text-align: right;
+    }
+
+    /* AI message content formatting */
+    .ai-bubble-list {
+      margin: 8px 0 4px 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ai-bubble-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .ai-bubble-list li::before {
+      content: '•';
+      color: #A63232;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .course-code {
+      font-weight: 600;
+      color: #1B2A4A;
+    }
+
+    .course-meta {
+      font-size: 13px;
+      color: #6B7280;
+    }
+
+    .ai-followup {
+      margin-top: 10px;
+      color: #1F2937;
+    }
+
+    /* ── Input area ── */
+    .input-area {
+      background: #F8F9FB;
+      border-top: 1px solid #E5E7EB;
+      padding: 16px 40px;
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .input-field {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: #1F2937;
+      background: transparent;
+      resize: none;
+    }
+
+    .input-field::placeholder {
+      color: #9CA3AF;
+    }
+
+    .send-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #A63232;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .send-button svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #FFFFFF;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .input-hint {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ── Error bubble ── */
+    .error-bubble {
+      background: #FEF2F2;
+      border: 1px solid #E5E7EB;
+      border-left: 3px solid #A63232;
+      border-radius: 2px 8px 8px 8px;
+      padding: 12px 16px;
+      color: #1F2937;
+      max-width: 460px;
+    }
+
+    .error-bubble-msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .error-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .retry-btn {
+      background: none;
+      border: none;
+      color: #A63232;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    /* ── Typing indicator ── */
+    .typing-bubble {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 2px 8px 8px 8px;
+      padding: 14px 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9CA3AF;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .dot:nth-child(1) { animation-delay: 0s; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ── Page wrapper ── */
+    .page-wrapper {
+      padding: 32px 0 48px 0;
+      min-width: 1280px;
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 0 0 24px 0;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: #1B2A4A;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: #6B7280;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ════ Page header ════ -->
+  <div class="page-header">
+    <h1>University AI — Chat Thread</h1>
+    <p>Key conversation mock · Maya's degree-planning journey · 2026-06-04</p>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION 1 — MAIN STATE (full conversation)
+       ════════════════════════════════════ -->
+  <div class="mock-section-label">Main state — full conversation</div>
+
+  <div class="browser-chrome">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="browser-address">university.edu/ai/chat</div>
+    </div>
+
+    <div class="app-shell">
+
+      <!-- Nav bar -->
+      <nav class="nav-bar">
+        <span class="nav-logo">University AI</span>
+        <div class="persona-chip">
+          <div class="persona-avatar">M</div>
+          Student
+        </div>
+      </nav>
+
+      <!-- Chat thread -->
+      <div class="chat-thread">
+
+        <div class="date-divider"><span>Today, June 4 2026</span></div>
+
+        <!-- Student: degree requirements -->
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              What courses do I still need to complete my CS degree?
+            </div>
+            <div class="bubble-meta">2:14 PM</div>
+          </div>
+        </div>
+
+        <!-- AI: degree requirements response -->
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="bubble ai-bubble">
+              <span>Based on your academic history, you have <strong>3 required courses</strong> left:</span>
+              <ul class="ai-bubble-list">
+                <li>
+                  <span><span class="course-code">CIS 401</span> — Advanced Algorithms <span class="course-meta">(offered Spring &amp; Fall)</span></span>
+                </li>
+                <li>
+                  <span><span class="course-code">CIS 450</span> — Operating Systems <span class="course-meta">(offered Fall only)</span></span>
+                </li>
+                <li>
+                  <span><span class="course-code">CIS 490</span> — Senior Capstone <span class="course-meta">(offered Spring only)</span></span>
+                </li>
+              </ul>
+              <div class="ai-followup">You're on track to graduate in <strong>May 2027</strong>. Want details on any of these?</div>
+            </div>
+            <div class="bubble-meta">University AI · 2:14 PM</div>
+          </div>
+        </div>
+
+        <!-- Student: CIS 401 question -->
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              Is CIS 401 offered next semester?
+            </div>
+            <div class="bubble-meta">2:15 PM</div>
+          </div>
+        </div>
+
+        <!-- AI: CIS 401 answer -->
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="bubble ai-bubble">
+              Yes — <span class="course-code">CIS 401</span> is offered this coming <strong>Spring semester (Jan–May 2027)</strong>. Registration opens <strong>Monday at 8am</strong>. Your prerequisite <span class="course-code">CIS 301</span> is already satisfied, so you're clear to enroll.
+            </div>
+            <div class="bubble-meta">University AI · 2:15 PM</div>
+          </div>
+        </div>
+
+      </div><!-- /chat-thread -->
+
+      <!-- Input area -->
+      <div class="input-area">
+        <div class="input-row">
+          <input class="input-field" type="text" placeholder="Ask about your courses, schedule, or advisor…" />
+          <button class="send-button" aria-label="Send">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">University AI may make mistakes. Verify important information with your academic advisor.</div>
+      </div>
+
+    </div><!-- /app-shell -->
+  </div><!-- /browser-chrome -->
+
+
+  <!-- ════════════════════════════════════
+       SECTION 2 — ERROR STATE
+       ════════════════════════════════════ -->
+  <div class="mock-section-label">Error state — failed AI response</div>
+
+  <div class="browser-chrome">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="browser-address">university.edu/ai/chat</div>
+    </div>
+
+    <div class="app-shell">
+
+      <nav class="nav-bar">
+        <span class="nav-logo">University AI</span>
+        <div class="persona-chip">
+          <div class="persona-avatar">M</div>
+          Student
+        </div>
+      </nav>
+
+      <div class="chat-thread">
+
+        <div class="date-divider"><span>Today, June 4 2026</span></div>
+
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              What courses do I still need to complete my CS degree?
+            </div>
+            <div class="bubble-meta">2:14 PM</div>
+          </div>
+        </div>
+
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="bubble ai-bubble">
+              <span>Based on your academic history, you have <strong>3 required courses</strong> left:</span>
+              <ul class="ai-bubble-list">
+                <li><span><span class="course-code">CIS 401</span> — Advanced Algorithms <span class="course-meta">(offered Spring &amp; Fall)</span></span></li>
+                <li><span><span class="course-code">CIS 450</span> — Operating Systems <span class="course-meta">(offered Fall only)</span></span></li>
+                <li><span><span class="course-code">CIS 490</span> — Senior Capstone <span class="course-meta">(offered Spring only)</span></span></li>
+              </ul>
+              <div class="ai-followup">You're on track to graduate in <strong>May 2027</strong>. Want details on any of these?</div>
+            </div>
+            <div class="bubble-meta">University AI · 2:14 PM</div>
+          </div>
+        </div>
+
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              Is CIS 401 offered next semester?
+            </div>
+            <div class="bubble-meta">2:15 PM</div>
+          </div>
+        </div>
+
+        <!-- ERROR bubble replaces last AI response -->
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="error-bubble">
+              <div class="error-bubble-msg">
+                <svg class="error-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="10" cy="10" r="9" stroke="#A63232" stroke-width="1.5"/>
+                  <line x1="10" y1="6" x2="10" y2="11" stroke="#A63232" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="10" cy="14" r="0.75" fill="#A63232"/>
+                </svg>
+                <span>I wasn't able to get a response. Please try again.</span>
+              </div>
+              <button class="retry-btn">Retry</button>
+            </div>
+            <div class="bubble-meta">2:15 PM</div>
+          </div>
+        </div>
+
+      </div><!-- /chat-thread -->
+
+      <div class="input-area">
+        <div class="input-row">
+          <input class="input-field" type="text" placeholder="Ask about your courses, schedule, or advisor…" />
+          <button class="send-button" aria-label="Send">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">University AI may make mistakes. Verify important information with your academic advisor.</div>
+      </div>
+
+    </div><!-- /app-shell -->
+  </div><!-- /browser-chrome -->
+
+
+  <!-- ════════════════════════════════════
+       SECTION 3 — TYPING STATE
+       ════════════════════════════════════ -->
+  <div class="mock-section-label">Typing state — AI generating response</div>
+
+  <div class="browser-chrome">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="browser-address">university.edu/ai/chat</div>
+    </div>
+
+    <div class="app-shell">
+
+      <nav class="nav-bar">
+        <span class="nav-logo">University AI</span>
+        <div class="persona-chip">
+          <div class="persona-avatar">M</div>
+          Student
+        </div>
+      </nav>
+
+      <div class="chat-thread">
+
+        <div class="date-divider"><span>Today, June 4 2026</span></div>
+
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              What courses do I still need to complete my CS degree?
+            </div>
+            <div class="bubble-meta">2:14 PM</div>
+          </div>
+        </div>
+
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="bubble ai-bubble">
+              <span>Based on your academic history, you have <strong>3 required courses</strong> left:</span>
+              <ul class="ai-bubble-list">
+                <li><span><span class="course-code">CIS 401</span> — Advanced Algorithms <span class="course-meta">(offered Spring &amp; Fall)</span></span></li>
+                <li><span><span class="course-code">CIS 450</span> — Operating Systems <span class="course-meta">(offered Fall only)</span></span></li>
+                <li><span><span class="course-code">CIS 490</span> — Senior Capstone <span class="course-meta">(offered Spring only)</span></span></li>
+              </ul>
+              <div class="ai-followup">You're on track to graduate in <strong>May 2027</strong>. Want details on any of these?</div>
+            </div>
+            <div class="bubble-meta">University AI · 2:14 PM</div>
+          </div>
+        </div>
+
+        <div class="message-row student">
+          <div class="avatar student-avatar">M</div>
+          <div>
+            <div class="bubble student-bubble">
+              Is CIS 401 offered next semester?
+            </div>
+            <div class="bubble-meta">2:15 PM</div>
+          </div>
+        </div>
+
+        <!-- TYPING indicator -->
+        <div class="message-row ai">
+          <div class="avatar ai-avatar">AI</div>
+          <div>
+            <div class="typing-bubble">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="bubble-meta">University AI is typing…</div>
+          </div>
+        </div>
+
+      </div><!-- /chat-thread -->
+
+      <div class="input-area">
+        <div class="input-row">
+          <input class="input-field" type="text" placeholder="Ask about your courses, schedule, or advisor…" />
+          <button class="send-button" style="opacity:0.5;cursor:not-allowed;" aria-label="Send" disabled>
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">University AI may make mistakes. Verify important information with your academic advisor.</div>
+      </div>
+
+    </div><!-- /app-shell -->
+  </div><!-- /browser-chrome -->
+
+</div><!-- /page-wrapper -->
+
+</body>
+</html>
